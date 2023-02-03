@@ -12,8 +12,8 @@ export class PasswordStrengthComponent {
   passwordStrength = ''
 
   colors = {
-      'empty': 'rgb(208, 201, 201)',
-      'less': 'rgb(205, 44, 44)',
+      'invalid': 'rgb(208, 201, 201)',
+      'weak': 'rgb(205, 44, 44)',
       'easy': 'rgb(205, 44, 44)',
       'medium': 'rgb(248, 236, 14)',
       'strong': 'rgb(40, 158, 40)',
@@ -21,39 +21,43 @@ export class PasswordStrengthComponent {
 
   handleChange(event: any): void {
     this.inputValue = event.target.value;
-    console.log(this.inputValue);
     const strength = this.checkStrength(this.inputValue);
     this.color = (this.colors as any)[strength];
     this.passwordStrength = strength;
   }
 
-  checkStrength(value: string): string {
-    const regex = /[$-/:-?{-~!"^_@`\[\]]/g;
+  checkStrength(password: string): string {
+    const specialCharacters = /[$-/:-?{~!"^_#@`\[\]]+/;
+    const digits = /[0-9]+/;
+    const letters = /[A-Za-z]+/;
 
-    const hasLowerLetters = /[a-z]+/.test(value.toLowerCase());
-    const hasNumbers = /[0-9]+/.test(value);
-    const hasSymbols = regex.test(value);
+    const hasLetters = letters.test(password);
+    const hasDigits = digits.test(password);
+    const hasCharacters = specialCharacters.test(password);
 
-    if ( value && value.length < 8) {
-      console.log('in less')
-      return 'less';
-    } else {
-      if (hasLowerLetters && hasNumbers && hasSymbols) {
-        console.log('strong, all types');
-        return 'strong';
-      } else if (
-        (hasLowerLetters && hasNumbers) ||
-        (hasLowerLetters && hasSymbols) ||
-        (hasNumbers && hasSymbols)
-      ) {
-        console.log('medium, 2 types');
-        return 'medium';
-      } else if (hasLowerLetters || hasNumbers || hasSymbols) {
-        console.log('easy, only 1 type');
-        return 'easy';
-      }
+    if (password.length === 0) {
+      return "invalid";
     }
-    console.log('empty')
-    return 'empty';
+
+    if ( password && password.length < 8) {
+      return 'weak';
+    }
+
+    if (hasLetters && hasDigits && hasCharacters) {
+      return 'strong';
+    }
+
+    if ((hasLetters && hasDigits) ||
+      (hasLetters && hasCharacters) ||
+      (hasDigits && hasCharacters)
+    ) {
+      return 'medium';
+    }
+
+    if (hasLetters || hasDigits || hasCharacters) {
+      return 'easy';
+    }
+
+    return "invalid";
   }
 }
